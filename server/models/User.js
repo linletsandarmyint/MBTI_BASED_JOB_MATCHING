@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     mbtiType: { type: String, default: null },
+    skillsCompleted: { type: Boolean, default: false },
     mbtiLastTestAt: { type: Date, default: null }, // <--- Add this
   },
   { timestamps: true },

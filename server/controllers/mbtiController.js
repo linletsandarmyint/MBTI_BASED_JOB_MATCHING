@@ -99,13 +99,20 @@ exports.getSavedAnswers = async (req, res) => {
 exports.submitAnswers = async (req, res) => {
   try {
     const userId = req.user.id; // ✅ get user from auth middleware
+    const user = await User.findById(userId);
 
+    // 🔹 Check if user has completed skill set
+    if (!user.skillsCompleted) {
+      return res.status(400).json({
+        message: "Please fill your skill set before taking the MBTI test",
+      });
+    }
     let { answers } = req.body; // answers can be array of strings or objects
     if (!answers || answers.length !== 10) {
       return res.status(400).json({ message: "Invalid answers" });
     }
 
-    const user = await User.findById(userId);
+   
 
     // ⏱️ 3-minute cooldown
     if (user.mbtiLastTestAt) {

@@ -119,6 +119,17 @@ const handleSubmit = async () => {
       alert("Please log in first!");
       return;
     }
+    const { data } = await axios.get("http://localhost:5000/api/auth/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const user = data.user; // <-- extract the actual user object
+
+    // Check if user completed skill set
+    if (!user.skillsCompleted) {
+      alert("Please fill your skill set before taking the MBTI test!");
+      return; // stop submission
+    }
 
     // Check if all questions answered
     if (Object.keys(answers).length < TOTAL_QUESTIONS) {
@@ -151,6 +162,7 @@ const handleSubmit = async () => {
     alert(err.response?.data?.message || "Failed to submit test!");
   }
 };
+
 const [attempts, setAttempts] = useState([]);
 
 useEffect(() => {

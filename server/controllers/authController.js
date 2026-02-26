@@ -94,15 +94,43 @@ exports.saveSkills = async (req, res) => {
   try {
     const { skills } = req.body;
 
-    if (!Array.isArray(skills)) {
-      return res.status(400).json({ message: "Invalid skills format" });
+    // Validate request body
+    if (!Array.isArray(skills) || skills.length === 0) {
+      return res.status(400).json({ message: "Skills array is required" });
     }
 
+    // Validate each skill
+    const validLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+    for (let i = 0; i < skills.length; i++) {
+      const s = skills[i];
+      if (!s.skill || !s.experienceLevel) {
+        return res
+          .status(400)
+          .json({
+            message: `Skill and experienceLevel are required for item ${i}`,
+          });
+      }
+      if (!validLevels.includes(s.experienceLevel)) {
+        return res
+          .status(400)
+          .json({
+            message: `Invalid experienceLevel at item ${i}. Allowed: ${validLevels.join(", ")}`,
+          });
+      }
+    }
+
+    // Save skills to user
     req.user.skills = skills;
+    req.user.skillsCompleted = true; // ✅ mark as completed
     await req.user.save();
 
-    res.json({ message: "Skills saved successfully" });
+    res.status(200).json({
+      message: "Skills saved successfully",
+      skills: req.user.skills,
+      skillsCompleted: req.user.skillsCompleted,
+    });
   } catch (error) {
+    console.error("Save Skills Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

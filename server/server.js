@@ -27,7 +27,7 @@ app.use(express.json());
 const adminRoutes = require("./routes/adminRoutes");
  const mbtiRoutes = require("./routes/mbtiRoutes");
  const jobRoutes = require("./routes/jobRoutes");
-// const skillRoutes = require("./routes/skillRoutes");
+const skillRoutes = require("./routes/skillRoutes");
  const aiRoutes = require("./routes/aiRoutes");
  const analyticsRoutes = require("./routes/analyticsRoutes");
 // // Mount routes
@@ -35,7 +35,7 @@ const adminRoutes = require("./routes/adminRoutes");
  app.use("/api/admin", adminRoutes);
  app.use("/api/mbti", mbtiRoutes);
  app.use("/api/jobs", jobRoutes);
-// app.use("/api/skills", skillRoutes);
+app.use("/api/skills", skillRoutes);
 app.use("/api/ai", aiRoutes);
  app.use("/api/analytics", analyticsRoutes);
 // Test route
