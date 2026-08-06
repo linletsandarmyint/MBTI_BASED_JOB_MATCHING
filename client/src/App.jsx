@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "../../../mbti/client/src/components/Navbar";
-import LoginModal from "../../../mbti/client/src/components/LoginModal";
-import SignupModal from "../../../mbti/client/src/components/SignupModal";
-import Home from "../../../mbti/client/src/pages/Home";
-import MbtiTestPage from "../../../mbti/client/src/pages/MbtiTestPage";
-import Resultpage from "../../../mbti/client/src/pages/Resultpage";
-import CompanyPortalPage from "../../../mbti/client/src/pages/CompanyPortalPage";
-import Jobresult from "../../../mbti/client/src/pages/Jobresult";
-import MyApplicationPage from "../../../mbti/client/src/pages/MyApplicationPage";
-import AdminPortal from "../../../mbti/client/src/pages/AdminPortal";
+import Navbar from "./components/Navbar";
+import LoginModal from "./components/LoginModal";
+import SignupModal from "./components/SignupModal";
+import Home from "./pages/Home";
+import MbtiTestPage from "./pages/MbtiTestPage";
+import Resultpage from "./pages/Resultpage";
+import CompanyPortalPage from "./pages/CompanyPortalPage";
+import Jobresult from "./pages/Jobresult";
+import MyApplicationPage from "./pages/MyApplicationPage";
+import AdminPortal from "./pages/AdminPortal";
 import MbtiAnalytics from "./pages/MbtiAnalytics";
-import SkillForm from "../../../mbti/client/src/components/SkillForm";
+import SkillForm from "./components/SkillForm";
 
 function App() {
   // State to control modal visibility
