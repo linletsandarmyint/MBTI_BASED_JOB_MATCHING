@@ -39,7 +39,7 @@ export default function MbtiTestPage() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get('${API_BASE_URL}/mbti/random'); // your backend endpoint
+        const res = await axios.get(`${API_BASE_URL}/mbti/random`); // your backend endpoint
         console.log(res.data);
         setQuestions(res.data.questions || []); // set the random 10 questions
         setLoading(false);
