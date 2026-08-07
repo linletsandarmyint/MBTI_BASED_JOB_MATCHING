@@ -115,7 +115,7 @@ export default function MbtiTestPage() {
         alert("Please log in first!");
         return;
       }
-      const { data } = await axios.get(`${API_BASE_URL}/auth/profile`, {
+      const { data } = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -143,7 +143,7 @@ export default function MbtiTestPage() {
 
       // Submit to backend
       const res = await axios.post(
-        `${API_BASE_URL}/mbti/submit`,
+        `${API_BASE_URL}/api/mbti/submit`,
         { answers: formattedAnswers },
         {
           headers: {
