@@ -3,6 +3,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
+
 // Load env
 dotenv.config();
 
@@ -14,7 +15,7 @@ const app = express();
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // React (Vite)
+    origin: "https://mbtibasedjobmatching.vercel.app", // React (Vite)
     credentials: true,
   }),
 );
