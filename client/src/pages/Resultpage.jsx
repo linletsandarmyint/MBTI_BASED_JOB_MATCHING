@@ -19,7 +19,7 @@ import {
   Calendar,
 } from "lucide-react";
 
-axios.defaults.baseURL = "http://localhost:5000/api";
+axios.defaults.baseURL = '${API_BASE_URL}'; // Ensure this matches your backend URL
 
 /* -------------------- CONFIG -------------------- */
 const traitCards = [

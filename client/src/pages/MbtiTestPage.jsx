@@ -5,16 +5,15 @@ import { IoEyeOutline } from "react-icons/io5";
 import { BsClockHistory } from "react-icons/bs";
 import { LuSend } from "react-icons/lu";
 import { LuBrain } from "react-icons/lu";
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export default function MbtiTestPage() {
   const TOTAL_QUESTIONS = 10;
   const QUESTIONS_PER_PAGE = 5;
   const [questions, setQuestions] = useState([]);
-const questionsLength = Array.isArray(questions) ? questions.length : 0;
+  const questionsLength = Array.isArray(questions) ? questions.length : 0;
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [answers, setAnswers] = useState({
-  });
+  const [answers, setAnswers] = useState({});
   // Fetch saved answers from backend when user is logged in
   useEffect(() => {
     const fetchSavedAnswers = async () => {
@@ -22,7 +21,7 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
       if (!token) return;
 
       try {
-        const res = await axios.get("http://localhost:5000/api/mbti/save", {
+        const res = await axios.get('${API_BASE_URL}/mbti/save', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -40,9 +39,9 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/mbti/random"); // your backend endpoint
+        const res = await axios.get('${API_BASE_URL}/mbti/random'); // your backend endpoint
         console.log(res.data);
-         setQuestions(res.data.questions || []);// set the random 10 questions
+        setQuestions(res.data.questions || []); // set the random 10 questions
         setLoading(false);
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -58,7 +57,6 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
   const currentQuestions = Array.isArray(questions)
     ? questions.slice(startIndex, endIndex)
     : [];
-
 
   const answeredCount = questions.reduce((count, q) => {
     return answers[q._id] ? count + 1 : count;
@@ -83,7 +81,7 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
 
       // 🔥 Ask backend if retake is allowed
       await axios.post(
-        "http://localhost:5000/api/mbti/retake",
+        "${API_BASE_URL}/mbti/retake",
         {},
         {
           headers: {
@@ -97,7 +95,7 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
       setCurrentPage(1);
 
       // ✅ Fetch new random questions
-      const res = await axios.get("http://localhost:5000/api/mbti/random", {
+      const res = await axios.get('${API_BASE_URL}/mbti/random', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,72 +108,70 @@ const questionsLength = Array.isArray(questions) ? questions.length : 0;
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in first!");
+        return;
+      }
+      const { data } = await axios.get('${API_BASE_URL}/auth/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  
-const handleSubmit = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please log in first!");
-      return;
-    }
-    const { data } = await axios.get("http://localhost:5000/api/auth/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const user = data.user; // <-- extract the actual user object
 
-    const user = data.user; // <-- extract the actual user object
+      // Check if user completed skill set
+      if (!user.skillsCompleted) {
+        alert("Please fill your skill set before taking the MBTI test!");
+        return; // stop submission
+      }
 
-    // Check if user completed skill set
-    if (!user.skillsCompleted) {
-      alert("Please fill your skill set before taking the MBTI test!");
-      return; // stop submission
-    }
+      // Check if all questions answered
+      if (Object.keys(answers).length < TOTAL_QUESTIONS) {
+        alert("Please answer all questions!");
+        return;
+      }
+      // Map answers to the current questions by _id
+      const formattedAnswers = questions.map((q) => answers[q._id] || null);
 
-    // Check if all questions answered
-    if (Object.keys(answers).length < TOTAL_QUESTIONS) {
-      alert("Please answer all questions!");
-      return;
-    }
-    // Map answers to the current questions by _id
-    const formattedAnswers = questions.map((q) => answers[q._id] || null);
+      // Check if all questions are answered
+      if (formattedAnswers.some((a) => a === null)) {
+        alert("Please answer all questions!");
+        return;
+      }
 
-    // Check if all questions are answered
-    if (formattedAnswers.some((a) => a === null)) {
-      alert("Please answer all questions!");
-      return;
-    }
-
-    // Submit to backend
-    const res = await axios.post(
-      "http://localhost:5000/api/mbti/submit",
-      { answers: formattedAnswers },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      // Submit to backend
+      const res = await axios.post(
+        '${API_BASE_URL}/mbti/submit',
+        { answers: formattedAnswers },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      },
-    );
+      );
 
-    alert("Your MBTI Type is: " + res.data.mbtiType);
-  } catch (err) {
-    console.error("Submit Error:", err);
-    alert(err.response?.data?.message || "Failed to submit test!");
-  }
-};
+      alert("Your MBTI Type is: " + res.data.mbtiType);
+    } catch (err) {
+      console.error("Submit Error:", err);
+      alert(err.response?.data?.message || "Failed to submit test!");
+    }
+  };
 
-const [attempts, setAttempts] = useState([]);
+  const [attempts, setAttempts] = useState([]);
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  axios
-    .get("http://localhost:5000/api/mbti/attempts", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((res) => setAttempts(res.data))
-    .catch(() => {});
-}, []);
+    axios
+      .get('${API_BASE_URL}/mbti/attempts', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setAttempts(res.data))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -218,7 +214,6 @@ useEffect(() => {
             </div>
           </div>
 
-          
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="font-semibold mb-3">Tips for Best Results</h3>
             <ul className="text-sm text-gray-600 space-y-2">
@@ -244,7 +239,6 @@ useEffect(() => {
                 >
                   Retake Test
                 </button>
-                
               </div>
             </div>
 
@@ -300,7 +294,7 @@ useEffect(() => {
                     }
 
                     const res = await axios.post(
-                      "http://localhost:5000/api/mbti/save",
+                      '"${API_BASE_URL}/mbti/save',
                       { answers },
                       {
                         headers: {

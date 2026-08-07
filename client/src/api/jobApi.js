@@ -1,28 +1,32 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // change if needed
+  baseURL: `${API_BASE_URL}/api`,
 });
 
 // attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     req.headers.Authorization = `Bearer ${token}`;
   }
+
   return req;
 });
 
 export const createJobApi = (jobData) => API.post("/jobs", jobData);
+
 export const getMyJobsApi = () => API.get("/jobs/my");
+
 export const updateJobApi = (id, jobData) => API.put(`/jobs/${id}`, jobData);
 
 export const deleteJobApi = (id) => API.delete(`/jobs/${id}`);
 
-
 // COMPANY JOBS WITH APPLICANT COUNT
-export const getCompanyJobsWithCountApi = () =>
-  API.get("/jobs/company/me");
+export const getCompanyJobsWithCountApi = () => API.get("/jobs/company/me");
 
 // GET APPLICANTS FOR ONE JOB
 export const getJobApplicationsApi = (jobId) =>
@@ -37,5 +41,6 @@ export const acceptApplicationApi = (appId) =>
 
 export const rejectApplicationApi = (appId) =>
   API.put(`/jobs/applications/${appId}/reject`);
+
 export const updateApplicationStatusApi = (appId, status) =>
   API.put(`/jobs/applications/${appId}/status`, { status });

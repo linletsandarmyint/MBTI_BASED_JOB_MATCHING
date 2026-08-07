@@ -15,7 +15,10 @@ const app = express();
 // ✅ Enable CORS
 app.use(
   cors({
-    origin: "https://mbtibasedjobmatching.vercel.app", // React (Vite)
+    origin: [
+      "http://localhost:5173",
+      "https://mbtibasedjobmatching.vercel.app",
+    ], // React (Vite)
     credentials: true,
   }),
 );

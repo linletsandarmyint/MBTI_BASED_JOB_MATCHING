@@ -1,9 +1,9 @@
 import axios from "axios";
 
 // Make sure your backend base URL is correct
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-// Optional: If using token-based auth
+// Optional: If using token-basedA auth
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token"); // or wherever you store your JWT
   return {
@@ -19,7 +19,7 @@ const getAuthHeaders = () => {
 export const getMbtiJobTrendsApi = async () => {
   try {
     const res = await axios.get(
-      `${API_BASE_URL}/analytics/mbti-job-trends`,
+      `${API_BASE_URL}/api/analytics/mbti-job-trends`,
       getAuthHeaders(),
     );
     return res.data;
@@ -34,7 +34,7 @@ export const getMbtiJobTrendsApi = async () => {
 // 🔹 NEW: Top Job per MBTI
 export const getJobTrends = async () => {
   const res = await axios.get(
-    `${API_BASE_URL}/analytics/job-trends`,
+    `${API_BASE_URL}/api/analytics/job-trends`,
     getAuthHeaders()
   );
   return res.data;

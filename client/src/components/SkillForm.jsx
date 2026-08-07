@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export default function SkillForm({ onClose }) {
   const [categories, setCategories] = useState([]);
   const [skillsDB, setSkillsDB] = useState([]);
@@ -18,7 +18,7 @@ export default function SkillForm({ onClose }) {
   /* ================= FETCH SKILLS ================= */
   useEffect(() => {
     const fetchSkills = async () => {
-      const res = await axios.get("http://localhost:5000/api/skills");
+      const res = await axios.get(`${API_BASE_URL}/api/skills`);
 
       setSkillsDB(res.data);
       setCategories([...new Set(res.data.map((s) => s.category))]);
@@ -81,11 +81,11 @@ export default function SkillForm({ onClose }) {
     setLoading(true);
     try {
       await axios.post(
-        "http://localhost:5000/api/auth/skills",
+        `${API_BASE_URL}/api/auth/skills`,
         { skills: selectedSkills },
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       alert("Skills saved successfully ✅");

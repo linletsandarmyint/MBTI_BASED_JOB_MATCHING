@@ -7,14 +7,14 @@ export default function Navbar({ onSkillClick, onLoginClick, onSignupClick }) {
   const [user, setUser] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
-
+const API = import.meta.env.VITE_API_URL;
   // Fetch logged-in user
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     axios
-      .get("http://localhost:5000/api/auth/profile", {
+      .get("${API}/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUser(res.data.user))
