@@ -44,7 +44,9 @@ app.use("/api/ai", aiRoutes);
  app.use("/api/analytics", analyticsRoutes);
 // Test route
 app.get("/", (req, res) => {
-  res.send("Server is running");
+  res.status(200).json({
+    message: "MBTI Based Job Matching API is running 🚀",
+  });
 });
 
 // ❗ GLOBAL ERROR HANDLER (VERY IMPORTANT)
