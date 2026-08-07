@@ -12,9 +12,9 @@ const API = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
     axios
-      .get("${API}/api/auth/profile", {
+      .get(`${API_BASE_URL}/api/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUser(res.data.user))
