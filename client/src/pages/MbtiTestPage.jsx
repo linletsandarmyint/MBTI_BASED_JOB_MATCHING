@@ -81,7 +81,7 @@ export default function MbtiTestPage() {
 
       // 🔥 Ask backend if retake is allowed
       await axios.post(
-        "${API_BASE_URL}/mbti/retake",
+        `${API_BASE_URL}/mbti/retake`,
         {},
         {
           headers: {
@@ -95,7 +95,7 @@ export default function MbtiTestPage() {
       setCurrentPage(1);
 
       // ✅ Fetch new random questions
-      const res = await axios.get('${API_BASE_URL}/mbti/random', {
+      const res = await axios.get(`${API_BASE_URL}/mbti/random`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -115,7 +115,7 @@ export default function MbtiTestPage() {
         alert("Please log in first!");
         return;
       }
-      const { data } = await axios.get('${API_BASE_URL}/auth/profile', {
+      const { data } = await axios.get(`${API_BASE_URL}/auth/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -143,7 +143,7 @@ export default function MbtiTestPage() {
 
       // Submit to backend
       const res = await axios.post(
-        '${API_BASE_URL}/mbti/submit',
+        `${API_BASE_URL}/mbti/submit`,
         { answers: formattedAnswers },
         {
           headers: {
@@ -166,7 +166,7 @@ export default function MbtiTestPage() {
     if (!token) return;
 
     axios
-      .get('${API_BASE_URL}/mbti/attempts', {
+      .get(`${API_BASE_URL}/mbti/attempts`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setAttempts(res.data))
@@ -294,7 +294,7 @@ export default function MbtiTestPage() {
                     }
 
                     const res = await axios.post(
-                      '"${API_BASE_URL}/mbti/save',
+                      `${API_BASE_URL}/mbti/save`,
                       { answers },
                       {
                         headers: {
