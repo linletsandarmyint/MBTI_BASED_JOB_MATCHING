@@ -168,7 +168,7 @@ const ResultPage = () => {
         const token = localStorage.getItem("token");
         if (!token) return setLoading(false);
 
-        const res = await axios.get("/mbti/my-mbti", {
+        const res = await axios.get("api/mbti/my-mbti", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setMbtiType(res.data.mbtiType);
@@ -193,7 +193,7 @@ const ResultPage = () => {
 
   /* ---------- FETCH ALL TYPES ---------- */
   useEffect(() => {
-    axios.get("/mbti/all-types").then((res) => setAllTypes(res.data));
+    axios.get("api/mbti/all-types").then((res) => setAllTypes(res.data));
   }, []);
 
   /* ---------- FETCH HISTORY ---------- */
@@ -202,7 +202,7 @@ const ResultPage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await axios.get("/mbti/compare", {
+        const res = await axios.get("api/mbti/compare", {
           headers: { Authorization: `Bearer ${token}` },
         });
         // Ensure history is an array
@@ -223,7 +223,7 @@ const ResultPage = () => {
       const token = localStorage.getItem("token");
       if (!token) return alert("Please login first");
 
-      const res = await axios.get("/mbti/compare", {
+      const res = await axios.get("api/mbti/compare", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
