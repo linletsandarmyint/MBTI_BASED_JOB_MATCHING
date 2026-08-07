@@ -21,7 +21,7 @@ export default function MbtiTestPage() {
       if (!token) return;
 
       try {
-        const res = await axios.get('${API_BASE_URL}/mbti/save', {
+        const res = await axios.get('${API_BASE_URL}/api/mbti/save', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -39,7 +39,7 @@ export default function MbtiTestPage() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/mbti/random`); // your backend endpoint
+        const res = await axios.get(`${API_BASE_URL}/api/mbti/random`); // your backend endpoint
         console.log(res.data);
         setQuestions(res.data.questions || []); // set the random 10 questions
         setLoading(false);
@@ -95,7 +95,7 @@ export default function MbtiTestPage() {
       setCurrentPage(1);
 
       // ✅ Fetch new random questions
-      const res = await axios.get(`${API_BASE_URL}/mbti/random`, {
+      const res = await axios.get(`${API_BASE_URL}/api/mbti/random`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -166,7 +166,7 @@ export default function MbtiTestPage() {
     if (!token) return;
 
     axios
-      .get(`${API_BASE_URL}/mbti/attempts`, {
+      .get(`${API_BASE_URL}/api/mbti/attempts`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setAttempts(res.data))
@@ -294,7 +294,7 @@ export default function MbtiTestPage() {
                     }
 
                     const res = await axios.post(
-                      `${API_BASE_URL}/mbti/save`,
+                      `${API_BASE_URL}/api/mbti/save`,
                       { answers },
                       {
                         headers: {
