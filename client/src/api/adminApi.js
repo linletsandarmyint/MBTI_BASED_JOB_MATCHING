@@ -49,7 +49,7 @@ export const deleteMbtiQuestion = (id) =>
 export const approveJobAdmin = (id) => API.put(`/admin/jobs/${id}/approve`);
 export const rejectJobAdmin = (id) => API.put(`/admin/jobs/${id}/reject`);
 export const getAdminAuditLogs = () => {
-  return axios.get("/admin/audit-logs", {
+  return axios.get("/api/admin/audit-logs", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
