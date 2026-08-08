@@ -102,7 +102,7 @@ export default function MatchedJobsPage() {
     if (!showMyApplications) return;
 
     axios
-      .get("/jobs/applications/me", {
+      .get("/api/jobs/applications/me", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setApplications(res.data))

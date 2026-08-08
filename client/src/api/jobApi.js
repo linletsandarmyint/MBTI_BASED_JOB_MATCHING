@@ -30,17 +30,17 @@ export const getCompanyJobsWithCountApi = () => API.get("/jobs/company/me");
 
 // GET APPLICANTS FOR ONE JOB
 export const getJobApplicationsApi = (jobId) =>
-  API.get(`/jobs/${jobId}/applications`);
+  API.get(`/api/jobs/${jobId}/applications`);
 
 // COMPANY REVIEW / ACCEPT / REJECT
 export const reviewApplicationApi = (appId) =>
-  API.put(`/jobs/applications/${appId}/review`);
+  API.put(`/api/jobs/applications/${appId}/review`);
 
 export const acceptApplicationApi = (appId) =>
-  API.put(`/jobs/applications/${appId}/accept`);
+  API.put(`/api/jobs/applications/${appId}/accept`);
 
 export const rejectApplicationApi = (appId) =>
-  API.put(`/jobs/applications/${appId}/reject`);
+  API.put(`/api/jobs/applications/${appId}/reject`);
 
 export const updateApplicationStatusApi = (appId, status) =>
-  API.put(`/jobs/applications/${appId}/status`, { status });
+  API.put(`/api/jobs/applications/${appId}/status`, { status });

@@ -129,10 +129,18 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
           <Link to="/jobresult" className="block px-6 py-3 hover:bg-gray-100">
             Jobs
           </Link>
-          <Link to="/companyportal" className="block px-6 py-3 hover:bg-gray-100">
+          <Link
+            to="/companyportal"
+            className="block px-6 py-3 hover:bg-gray-100"
+          >
             Company Portal
           </Link>
-
+          <button
+            onClick={() => onSkillClick && onSkillClick()}
+            className="border px-3 py-1 rounded hover:text-teal-600"
+          >
+            Skill Set
+          </button>
           {!user ? (
             <>
               <button
