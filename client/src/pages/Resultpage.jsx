@@ -184,7 +184,7 @@ const ResultPage = () => {
   useEffect(() => {
     if (!mbtiType) return;
     const load = async () => {
-      const res = await axios.get(`/mbti/descriptions/${mbtiType}`);
+      const res = await axios.get(`api/mbti/descriptions/${mbtiType}`);
       setData(res.data);
       setLoading(false);
     };

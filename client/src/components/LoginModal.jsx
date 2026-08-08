@@ -15,14 +15,13 @@ export default function LoginModal({ onClose }) {
     try {
       const res = await loginUser({ email, password });
       console.log("Login success:", res.data);
+      if (res.data.token) {
+  localStorage.setItem("token", res.data.token);
+  console.log("Token saved:", localStorage.getItem("token"));
+}
         alert("Login successful!"); // ✅ show message
         onClose();
-      // OPTIONAL: save token
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-      }
-
-      onClose(); // close modal
+      
     } catch (err) {
       setError(err.response?.data?.message || "Login failed! Please try again.");
     } finally {

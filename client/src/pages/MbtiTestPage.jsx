@@ -292,10 +292,21 @@ export default function MbtiTestPage() {
                       alert("Please log in first!");
                       return;
                     }
-
+                    // Convert answers object to backend format
+                    const formattedAnswers = Object.entries(answers).map(
+                      ([questionId, value]) => ({
+                        questionId,
+                        value,
+                      }),
+                    );
+ console.log("Sending answers:", formattedAnswers);
+ if (formattedAnswers.length === 0) {
+   alert("Please answer at least one question first!");
+   return;
+ }
                     const res = await axios.post(
                       `${API_BASE_URL}/api/mbti/save`,
-                      { answers },
+                      { answers: formattedAnswers },
                       {
                         headers: {
                           Authorization: `Bearer ${token}`, // ✅ send token to backend
