@@ -8,7 +8,7 @@
 
    useEffect(() => {
      axios
-       .get("/jobs/applications/me", {
+       .get("/api/jobs/applications/me", {
          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
        })
        .then((res) => {

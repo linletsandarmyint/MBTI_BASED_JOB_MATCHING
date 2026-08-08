@@ -67,11 +67,11 @@ router.delete("/users/:id", protect, authorize("admin"), adminController.deleteU
 router.get("/jobs", protect, authorize("admin"), adminController.getAllJobs);
 
 // Get job details
-router.get("/jobs/:id", protect, authorize("admin"), adminController.getJobDetails);
+router.get("/api/jobs/:id", protect, authorize("admin"), adminController.getJobDetails);
 
 // Archive / Unarchive job
 router.put(
-  "/jobs/:id/archive",
+  "/api/jobs/:id/archive",
   protect,
   authorize("admin"),
   adminController.toggleJobArchive
@@ -79,13 +79,13 @@ router.put(
 
 
 // Delete job
-router.delete("/jobs/:id", protect, authorize("admin"), adminController.deleteJobAdmin);
+router.delete("/api/jobs/:id", protect, authorize("admin"), adminController.deleteJobAdmin);
 
 // Approve job
-router.put("/jobs/:id/approve", protect, authorize("admin"), adminController.approveJob);
+router.put("/api/jobs/:id/approve", protect, authorize("admin"), adminController.approveJob);
 
 // Reject job
-router.put("/jobs/:id/reject", protect, authorize("admin"), adminController.rejectJob);
+router.put("/api/jobs/:id/reject", protect, authorize("admin"), adminController.rejectJob);
 
 // ================= DASHBOARD STATS =================
 router.get(

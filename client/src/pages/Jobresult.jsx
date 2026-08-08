@@ -67,7 +67,7 @@ export default function MatchedJobsPage() {
     if (!selectedJob) return; // important!
 
     axios
-      .get(`/jobs/${selectedJob._id}/application-status`, {
+      .get(`/api/jobs/${selectedJob._id}/application-status`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setHasApplied(res.data.hasApplied))
@@ -77,7 +77,7 @@ export default function MatchedJobsPage() {
   /* ---------------- FETCH MATCHED JOBS ---------------- */
   useEffect(() => {
     axios
-      .get("api/jobs/matched", {
+      .get("/api/jobs/matched", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
@@ -91,7 +91,7 @@ export default function MatchedJobsPage() {
     if (!selectedJob) return;
 
     axios
-      .get(`/jobs/${selectedJob._id}/application-status`, {
+      .get(`/api/jobs/${selectedJob._id}/application-status`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setHasApplied(res.data.hasApplied))
@@ -190,7 +190,7 @@ export default function MatchedJobsPage() {
     setSelectedJob(job);
 
     try {
-      const res = await axios.get(`/jobs/ai-explain/${job._id}`, {
+      const res = await axios.get(`/api/jobs/ai-explain/${job._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -206,7 +206,7 @@ export default function MatchedJobsPage() {
     setApplying(true);
     try {
       await axios.post(
-        `/jobs/${selectedJob._id}/apply`,
+        `/api/jobs/${selectedJob._id}/apply`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
