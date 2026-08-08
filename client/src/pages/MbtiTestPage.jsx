@@ -294,7 +294,7 @@ export default function MbtiTestPage() {
                     }
 
                     const res = await axios.post(
-                      `${API_BASE_URL}/mbti/save`,
+                      `${API_BASE_URL}/api/mbti/save`,
                       { answers },
                       {
                         headers: {

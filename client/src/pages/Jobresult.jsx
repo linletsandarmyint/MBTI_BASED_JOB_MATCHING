@@ -77,7 +77,7 @@ export default function MatchedJobsPage() {
   /* ---------------- FETCH MATCHED JOBS ---------------- */
   useEffect(() => {
     axios
-      .get("/jobs/matched", {
+      .get("api/jobs/matched", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
