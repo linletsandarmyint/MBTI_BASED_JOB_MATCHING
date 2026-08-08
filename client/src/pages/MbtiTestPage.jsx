@@ -306,7 +306,7 @@ export default function MbtiTestPage() {
  }
                     const res = await axios.post(
                       `${API_BASE_URL}/api/mbti/save`,
-                      { answers: formattedAnswers },
+                      { answers: formattedAnswers},
                       {
                         headers: {
                           Authorization: `Bearer ${token}`, // ✅ send token to backend

@@ -126,18 +126,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
           <Link to="/mbti-test" className="block px-6 py-3 hover:bg-gray-100">
             MBTI Test
           </Link>
-          <Link to="/jobresult" className="block px-6 py-3 hover:bg-gray-100">
+          <Link to="/result" className="hover:text-teal-600">
+            My results
+          </Link>
+          <Link to="/jobresult" className="hover:text-teal-600">
             Jobs
           </Link>
-          <Link
-            to="/companyportal"
-            className="block px-6 py-3 hover:bg-gray-100"
-          >
+          <Link to="/analytics" className="hover:text-teal-600">
+            Graph
+          </Link>
+          <Link to="/companyportal" className="hover:text-teal-600">
             Company Portal
+          </Link>
+          <Link to="/admin" className="hover:text-teal-600">
+            Admin
           </Link>
           <button
             onClick={() => onSkillClick && onSkillClick()}
-            className="border px-3 py-1 rounded hover:text-teal-600"
+            className="w-full text-left px-6 py-3 hover:text-teal-600"
           >
             Skill Set
           </button>
