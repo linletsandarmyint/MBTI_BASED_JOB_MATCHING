@@ -26,7 +26,7 @@ export const updateJobApi = (id, jobData) => API.put(`/api/jobs/${id}`, jobData)
 export const deleteJobApi = (id) => API.delete(`/api/jobs/${id}`);
 
 // COMPANY JOBS WITH APPLICANT COUNT
-export const getCompanyJobsWithCountApi = () => API.get("/api/jobs/company/me");
+export const getCompanyJobsWithCountApi = () => API.get("/jobs/company/me");
 
 // GET APPLICANTS FOR ONE JOB
 export const getJobApplicationsApi = (jobId) =>
