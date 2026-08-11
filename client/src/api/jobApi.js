@@ -19,11 +19,11 @@ API.interceptors.request.use((req) => {
 
 export const createJobApi = (jobData) => API.post("/jobs", jobData);
 
-export const getMyJobsApi = () => API.get("/api/jobs/my");
+export const getMyJobsApi = () => API.get("/jobs/my");
 
-export const updateJobApi = (id, jobData) => API.put(`/api/jobs/${id}`, jobData);
+export const updateJobApi = (id, jobData) => API.put(`/jobs/${id}`, jobData);
 
-export const deleteJobApi = (id) => API.delete(`/api/jobs/${id}`);
+export const deleteJobApi = (id) => API.delete(`/jobs/${id}`);
 
 // COMPANY JOBS WITH APPLICANT COUNT
 export const getCompanyJobsWithCountApi = () => API.get("/jobs/company/me");

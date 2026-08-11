@@ -21,7 +21,7 @@ export default function MbtiTestPage() {
       if (!token) return;
 
       try {
-        const res = await axios.get(`${API_BASE_URL}/mbti/save`, {
+        const res = await axios.get(`${API_BASE_URL}/api/mbti/save`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

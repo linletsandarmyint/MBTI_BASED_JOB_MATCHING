@@ -3,7 +3,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API = axios.create({
   baseURL: `${API_BASE_URL}/api`,
 });
-const token = localStorage.getItem("token");
 // automatically attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
@@ -48,10 +47,5 @@ export const deleteMbtiQuestion = (id) =>
   API.delete(`/admin/mbti/questions/${id}`);
 export const approveJobAdmin = (id) => API.put(`/admin/jobs/${id}/approve`);
 export const rejectJobAdmin = (id) => API.put(`/admin/jobs/${id}/reject`);
-export const getAdminAuditLogs = () => {
-  return axios.get("/api/admin/audit-logs", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+
+export const getAdminAuditLogs = () => API.get("/admin/audit-logs");
