@@ -12,7 +12,7 @@ export default function Welcome() {
         </div>
 
         <a
-          href="#"
+          href="/profile"
           className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100"
         >
           ✏️ Edit Profile

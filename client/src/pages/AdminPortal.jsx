@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Users,
   Building2,
@@ -33,11 +34,22 @@ import {
   rejectJobAdmin,
   getAdminAuditLogs,
   
-} from "../api/adminApi";
+} from "../api/adminApi2";
+
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import Modal from "../components/ui/Modal";
+import Button from "../components/ui/Button";
 
 export default function AdminPortal() {
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState("users");
+  const location = useLocation();
+
+  // set active tab from URL hash if present (e.g., /admin#jobs)
+  useEffect(() => {
+    const h = (location.hash || "").replace("#", "");
+    if (h) setActiveTab(h);
+  }, [location]);
 
   // User state
   const [users, setUsers] = useState([]);
@@ -66,6 +78,9 @@ export default function AdminPortal() {
 
   // audit log
   const [auditLogs, setAuditLogs] = useState([]);
+
+  // confirm dialog state
+  const [confirm, setConfirm] = useState({ open: false, title: "Confirm", message: "", onConfirm: null, confirmLabel: "Delete", cancelLabel: "Cancel" });
 
   // Fetch Overview
   useEffect(() => {
@@ -158,9 +173,18 @@ const actionConfig = {
   };
 
   const handleDeleteUser = async (id) => {
-    if (!window.confirm("Delete this user?")) return;
-    await deleteUserAdmin(id);
-    setUsers((prev) => prev.filter((u) => u._id !== id));
+    setConfirm({
+      open: true,
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      onConfirm: async () => {
+        await deleteUserAdmin(id);
+        setUsers((prev) => prev.filter((u) => u._id !== id));
+        setConfirm((c) => ({ ...c, open: false }));
+      },
+    });
   };
 
   // Job actions
@@ -172,9 +196,18 @@ const actionConfig = {
   };
 
   const handleDeleteJob = async (id) => {
-    if (!window.confirm("Delete this job?")) return;
-    await deleteJobAdmin(id);
-    setJobs((prev) => prev.filter((j) => j._id !== id));
+    setConfirm({
+      open: true,
+      title: "Delete Job",
+      message: "Are you sure you want to delete this job? This action cannot be undone.",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      onConfirm: async () => {
+        await deleteJobAdmin(id);
+        setJobs((prev) => prev.filter((j) => j._id !== id));
+        setConfirm((c) => ({ ...c, open: false }));
+      },
+    });
   };
 
   const handleOpenJobDetails = async (id) => {
@@ -254,9 +287,18 @@ const actionConfig = {
   };
 
   const handleDeleteMbti = async (id) => {
-    if (!window.confirm("Delete this question?")) return;
-    await deleteMbtiQuestion(id);
-    setMbtiQuestions((prev) => prev.filter((q) => q._id !== id));
+    setConfirm({
+      open: true,
+      title: "Delete Question",
+      message: "Are you sure you want to delete this question? This action cannot be undone.",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      onConfirm: async () => {
+        await deleteMbtiQuestion(id);
+        setMbtiQuestions((prev) => prev.filter((q) => q._id !== id));
+        setConfirm((c) => ({ ...c, open: false }));
+      },
+    });
   };
 
   return (
@@ -407,133 +449,123 @@ const actionConfig = {
 
       {/* Job Modal */}
       {showModal && selectedJob && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-11/12 md:w-1/2">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Job Details</h3>
-              <button onClick={() => setShowModal(false)}>X</button>
-            </div>
+        <Modal title="Job Details" onClose={() => setShowModal(false)} className="w-full max-w-2xl">
+          <h2 className="font-bold text-xl mb-2">{selectedJob.title}</h2>
 
-            <h2 className="font-bold text-xl mb-2">{selectedJob.title}</h2>
-
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700">
-                {selectedJob.location}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-green-100 text-green-700">
-                {selectedJob.jobType}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                {selectedJob.locationType}
-              </span>
-              <span
-                className={`px-3 py-1 rounded-full ${
-                  selectedJob.isActive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {selectedJob.isActive ? "Active" : "Archived"}
-              </span>
-            </div>
-
-            <p className="text-sm text-gray-700 mb-4">
-              {selectedJob.description}
-            </p>
-
-            <div className="mb-2 font-semibold">Required Skills:</div>
-            <div className="flex flex-wrap gap-2">
-              {selectedJob.requiredSkills?.map((s, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs"
-                >
-                  {s}
-                </span>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+              {selectedJob.location}
+            </span>
+            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700">
+              {selectedJob.jobType}
+            </span>
+            <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">
+              {selectedJob.locationType}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full ${
+                selectedJob.isActive
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {selectedJob.isActive ? "Active" : "Archived"}
+            </span>
           </div>
-        </div>
+
+          <p className="text-sm text-gray-700 mb-4">{selectedJob.description}</p>
+
+          <div className="mb-2 font-semibold">Required Skills:</div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {selectedJob.requiredSkills?.map((s, i) => (
+              <span key={i} className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs">
+                {s}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <Button variant="secondary" size="md" onClick={() => setShowModal(false)}>Close</Button>
+          </div>
+        </Modal>
       )}
 
       {/* MBTI Modal */}
       {mbtiModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-11/12 md:w-1/2">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">
-                {editingQuestion ? "Edit Question" : "Add Question"}
-              </h3>
-              <button onClick={() => setMbtiModal(false)}>X</button>
-            </div>
-
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Question Text</label>
-              <input
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2"
-                placeholder="Enter question text"
-              />
-            </div>
-
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <label className="font-medium">Options (Dimension)</label>
-                <button
-                  className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg"
-                  onClick={handleAddOption}
-                >
-                  <PlusCircle size={16} /> Add Option
-                </button>
-              </div>
-
-              {options.map((opt, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
-                  <input
-                    value={opt.text}
-                    onChange={(e) =>
-                      handleOptionChange(idx, "text", e.target.value)
-                    }
-                    className="w-2/3 border rounded-lg px-3 py-2"
-                    placeholder="Option text"
-                  />
-                  <select
-                    value={opt.value}
-                    onChange={(e) =>
-                      handleOptionChange(idx, "value", e.target.value)
-                    }
-                    className="w-1/3 border rounded-lg px-3 py-2"
-                  >
-                    <option value="E">E</option>
-                    <option value="I">I</option>
-                    <option value="S">S</option>
-                    <option value="N">N</option>
-                    <option value="T">T</option>
-                    <option value="F">F</option>
-                    <option value="J">J</option>
-                    <option value="P">P</option>
-                  </select>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-4 py-2 rounded-lg bg-gray-100"
-                onClick={() => setMbtiModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded-lg bg-teal-500 text-white"
-                onClick={handleSaveMbtiQuestion}
-              >
-                Save Question
-              </button>
-            </div>
+        <Modal title={editingQuestion ? "Edit Question" : "Add Question"} onClose={() => setMbtiModal(false)} className="w-full max-w-2xl">
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Question Text</label>
+            <input
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="Enter question text"
+            />
           </div>
-        </div>
+
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <label className="font-medium">Options (Dimension)</label>
+              <button
+                className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-lg"
+                onClick={handleAddOption}
+              >
+                <PlusCircle size={16} /> Add Option
+              </button>
+            </div>
+
+            {options.map((opt, idx) => (
+              <div key={idx} className="flex gap-2 mb-2">
+                <input
+                  value={opt.text}
+                  onChange={(e) =>
+                    handleOptionChange(idx, "text", e.target.value)
+                  }
+                  className="w-2/3 border rounded-lg px-3 py-2"
+                  placeholder="Option text"
+                />
+                <select
+                  value={opt.value}
+                  onChange={(e) =>
+                    handleOptionChange(idx, "value", e.target.value)
+                  }
+                  className="w-1/3 border rounded-lg px-3 py-2"
+                >
+                  <option value="E">E</option>
+                  <option value="I">I</option>
+                  <option value="S">S</option>
+                  <option value="N">N</option>
+                  <option value="T">T</option>
+                  <option value="F">F</option>
+                  <option value="J">J</option>
+                  <option value="P">P</option>
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" size="md" onClick={() => setMbtiModal(false)}>Cancel</Button>
+            <Button variant="primary" size="md" onClick={handleSaveMbtiQuestion}>Save Question</Button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Confirm Dialog */}
+      {confirm && (
+        <ConfirmDialog
+          open={confirm.open}
+          title={confirm.title}
+          message={confirm.message}
+          confirmLabel={confirm.confirmLabel}
+          cancelLabel={confirm.cancelLabel}
+          onClose={() => setConfirm((c) => ({ ...c, open: false }))}
+          onConfirm={() => {
+            // call stored confirm handler if present
+            if (confirm.onConfirm) confirm.onConfirm();
+            setConfirm((c) => ({ ...c, open: false }));
+          }}
+        />
       )}
     </div>
   );
@@ -635,8 +667,8 @@ const UserManagement = ({
       </select>
     </div>
 
-    <div className="bg-white rounded-xl shadow overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-xl shadow overflow-x-auto">
+      <table className="min-w-[700px] w-full text-sm">
         <thead className="bg-gray-100 text-gray-600">
           <tr>
             <th className="px-4 py-3 text-left">Name</th>
@@ -725,8 +757,8 @@ const JobManagement = ({
       </button>
     </div>
 
-    <div className="bg-white rounded-xl shadow overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-xl shadow overflow-x-auto">
+      <table className="min-w-[900px] w-full text-sm">
         <thead className="bg-gray-100 text-gray-600">
           <tr>
             <th className="px-4 py-3 text-left">Title</th>
@@ -832,8 +864,8 @@ const MBTIManagement = ({
       </button>
     </div>
 
-    <div className="bg-white rounded-xl shadow overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-xl shadow overflow-x-auto">
+      <table className="min-w-[700px] w-full text-sm">
         <thead className="bg-gray-100 text-gray-600">
           <tr>
             <th className="px-4 py-3 text-left">Order</th>

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function MbtiDashboard() {
   return (
     <section id="mbti" className="max-w-7xl mx-auto px-6 py-12">
@@ -41,9 +43,9 @@ export default function MbtiDashboard() {
           </p>
 
           <div className="mt-4 flex gap-4">
-            <a href="#" className="text-teal-600 underline">
+            <Link to="/mbti-test" className="text-teal-600 underline">
               Retake Test
-            </a>
+            </Link>
             <a href="#mbti-types" className="text-teal-600 underline">
               View Type Result
             </a>

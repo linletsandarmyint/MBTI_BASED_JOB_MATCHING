@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+﻿import { useEffect, useState } from "react";
+import API from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -18,8 +18,9 @@ import {
   XCircle,
   Calendar,
 } from "lucide-react";
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-axios.defaults.baseURL = `${API_BASE_URL}`; // Ensure this matches your backend URL
+
+import Modal from "../components/ui/Modal";
+import Button from "../components/ui/Button";
 
 /* -------------------- CONFIG -------------------- */
 const traitCards = [
@@ -47,12 +48,12 @@ const InfoCard = ({ title, icon: Icon, items }) => (
   </div>
 );
 
-/* -------------------- COMPARE MODAL -------------------- */
+/* -------------------- COMPARE MODAL (uses Modal) -------------------- */
 const CompareModal = ({ data, onClose }) => {
   if (!data) return null;
 
-  const prev = data.previous.mbtiType.split("");
-  const curr = data.current.mbtiType.split("");
+  const prev = data.previous?.mbtiType?.split("") || [];
+  const curr = data.current?.mbtiType?.split("") || [];
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -61,83 +62,67 @@ const CompareModal = ({ data, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-[420px] rounded-3xl p-6 shadow-xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-teal-600 text-lg">
-            MBTI Comparison
-          </h3>
-          <button onClick={onClose}>
-            <X />
-          </button>
-        </div>
-
-        <div className="text-center text-teal-600 font-bold text-xl mb-4">
-          {data.previous.mbtiType} → {data.current.mbtiType}
-        </div>
-
-        {/* Comparison */}
-        <div className="space-y-2">
-          {prev.map((p, i) => {
-            const c = curr[i];
-            const same = p === c;
-            return (
-              <div
-                key={i}
-                className="flex justify-between text-teal-700 bg-gray-50 p-3 rounded-xl text-sm"
-              >
-                <span>
-                  {p} → {c}
-                </span>
-                <span>
-                  {same ? (
-                    <CheckCircle size={20} className="text-teal-600" />
-                  ) : (
-                    <XCircle size={20} className="text-red-400" />
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+    <Modal title="MBTI Comparison" onClose={onClose} className="w-full max-w-md">
+      <div className="text-center text-teal-600 font-bold text-xl mb-4">
+        {data.previous?.mbtiType} → {data.current?.mbtiType}
       </div>
-    </div>
+
+      <div className="space-y-2">
+        {prev.map((p, i) => {
+          const c = curr[i];
+          const same = p === c;
+          return (
+            <div
+              key={i}
+              className="flex justify-between text-teal-700 bg-gray-50 p-3 rounded-xl text-sm"
+            >
+              <span>
+                {p} → {c}
+              </span>
+              <span>
+                {same ? (
+                  <CheckCircle size={20} className="text-teal-600" />
+                ) : (
+                  <XCircle size={20} className="text-red-400" />
+                )}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <Button variant="secondary" size="md" onClick={onClose}>Close</Button>
+      </div>
+    </Modal>
   );
 };
 
-/* -------------------- TYPE MODAL -------------------- */
+/* -------------------- TYPE MODAL (uses Modal) -------------------- */
 const TypeModal = ({ data, onClose }) => {
   if (!data) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white w-[460px] rounded-3xl shadow-xl p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-bold flex items-center justify-center">
-              {data.type}
-            </div>
-            <h3 className="font-semibold text-xl">{data.type} Personality</h3>
-          </div>
-          <button onClick={onClose}>
-            <X className="text-gray-400 hover:text-gray-600" />
-          </button>
+    <Modal title={`${data.type} Personality`} onClose={onClose} className="w-full max-w-2xl">
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-bold flex items-center justify-center">
+          {data.type}
         </div>
-
-        <div className="space-y-4">
-          <InfoCard
-            title="Key Strengths"
-            icon={Sparkles}
-            items={data.keyStrengths}
-          />
-          <InfoCard
-            title="Work Style Preferences"
-            icon={Briefcase}
-            items={data.workStylePreferences}
-          />
+        <div>
+          <h3 className="font-semibold text-xl">{data.type} Personality</h3>
+          <p className="text-sm text-gray-500">{data.summary}</p>
         </div>
       </div>
-    </div>
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InfoCard title="Key Strengths" icon={Sparkles} items={data.keyStrengths} />
+        <InfoCard title="Work Style Preferences" icon={Briefcase} items={data.workStylePreferences} />
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <Button variant="primary" size="md" onClick={onClose}>Close</Button>
+      </div>
+    </Modal>
   );
 };
 
@@ -154,24 +139,19 @@ const ResultPage = () => {
   const [history, setHistory] = useState([]);
   const navigate = useNavigate();
 
-  /* ---------- FORMAT DATE ---------- */
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
     return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
-  /* ---------- FETCH USER MBTI ---------- */
+  /* FETCH USER MBTI */
   useEffect(() => {
     const load = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return setLoading(false);
-
-        const res = await axios.get("api/mbti/my-mbti", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setMbtiType(res.data.mbtiType);
+        const res = await API.get('/mbti/my-mbti');
+        if (res?.data?.mbtiType) setMbtiType(res.data.mbtiType);
+        else setLoading(false);
       } catch (err) {
         console.error(err);
         setLoading(false);
@@ -180,32 +160,32 @@ const ResultPage = () => {
     load();
   }, []);
 
-  /* ---------- FETCH DESCRIPTION ---------- */
+  /* FETCH DESCRIPTION */
   useEffect(() => {
     if (!mbtiType) return;
     const load = async () => {
-      const res = await axios.get(`api/mbti/descriptions/${mbtiType}`);
-      setData(res.data);
-      setLoading(false);
+      try {
+        const res = await API.get(`/mbti/descriptions/${mbtiType}`);
+        setData(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [mbtiType]);
 
-  /* ---------- FETCH ALL TYPES ---------- */
+  /* FETCH ALL TYPES */
   useEffect(() => {
-    axios.get("api/mbti/all-types").then((res) => setAllTypes(res.data));
+    API.get('/mbti/all-types').then((res) => setAllTypes(res.data)).catch((e)=>console.error(e));
   }, []);
 
-  /* ---------- FETCH HISTORY ---------- */
+  /* FETCH HISTORY */
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const res = await axios.get("api/mbti/compare", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // Ensure history is an array
+        const res = await API.get('/mbti/compare');
         const h = [];
         if (res.data.previous) h.push(res.data.previous);
         if (res.data.current) h.push(res.data.current);
@@ -217,20 +197,13 @@ const ResultPage = () => {
     fetchHistory();
   }, []);
 
-  /* ---------- OPEN COMPARE MODAL ---------- */
   const openCompare = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return alert("Please login first");
-
-      const res = await axios.get("api/mbti/compare", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await API.get('/mbti/compare');
       setCompareData(res.data);
       setCompareOpen(true);
     } catch (err) {
-      alert(err.response?.data?.message || "Compare failed");
+      alert(err.response?.data?.message || 'Compare failed');
     }
   };
 
@@ -240,187 +213,95 @@ const ResultPage = () => {
   const ActiveIcon = traitCards.find((t) => t.key === activeTrait).icon;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="p-6 max-w-6xl mx-auto space-y-10">
-        {/* HERO HEADER */}
-        <div className="bg-gray-50 rounded-3xl overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-center py-16 px-6">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">
-              Your Personality Result
-            </h1>
-            <p className="text-sm md:text-base max-w-xl mx-auto opacity-90">
-              Explore your strengths, work style, and personality insights to
-              understand what makes you unique.
-            </p>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 space-y-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-800">My MBTI Result</h1>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate('/mbti/test')} className="px-4 py-2 bg-white rounded-xl border">Retake</button>
+            <button onClick={openCompare} className="px-4 py-2 bg-teal-500 text-white rounded-xl">Compare</button>
           </div>
         </div>
 
-        {/* MBTI CARD */}
-        <div className="bg-white rounded-3xl p-6 shadow-md flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-bold text-2xl flex items-center justify-center shadow">
-              {mbtiType}
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold">{mbtiType}</h2>
-              <p className="text-sm text-gray-500">
-                Myers–Briggs Personality Type
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={openCompare}
-              className="flex items-center text-teal-600 gap-2 px-4 py-2 border rounded-xl"
-            >
-              <GitCompare size={16} /> Compare
-            </button>
-          </div>
-        </div>
-
-        {/* TRAITS */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {traitCards.map(({ key, title, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTrait(key)}
-                className={`rounded-2xl p-4 border transition-all ${activeTrait === key ? "bg-teal-50 border-teal-500 shadow" : "hover:bg-gray-50"}`}
-              >
-                <Icon className="mx-auto text-teal-600" />
-                <p className="text-sm mt-2 text-center">{title}</p>
-              </button>
-            ))}
-          </div>
-          <div className="mt-6 bg-gray-50 rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <ActiveIcon className="text-teal-600" />
-              <h3 className="font-semibold">
-                {traitCards.find((t) => t.key === activeTrait).title}
-              </h3>
-            </div>
-            <p className="text-sm text-gray-700">
-              {data.traitBreakdown[activeTrait]}
-            </p>
-          </div>
-        </div>
-
-        {/* STRENGTHS & WORK STYLE */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <InfoCard
-            title="Key Strengths"
-            icon={Sparkles}
-            items={data.keyStrengths}
-          />
-          <InfoCard
-            title="Work Style Preferences"
-            icon={Briefcase}
-            items={data.workStylePreferences}
-          />
-        </div>
-
-        {/* CAREERS */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm">
-          <h3 className="font-semibold mb-3">Recommended Career Areas</h3>
-          <button
-            onClick={() => navigate("/jobresult")}
-            className="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl text-sm shadow"
-          >
-            <Search size={16} /> View Matched Jobs
-          </button>
-        </div>
-
-        {/* TEST HISTORY */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm space-y-3">
-          <div className="flex items-center gap-2 mb-2">
-            <History size={18} className="text-teal-600" />
-            <span className="font-semibold">Test History</span>
-            
-          </div>
-
-          {history.length === 0 ? (
-            <p className="text-gray-500 text-sm">No tests taken yet.</p>
-          ) : (
-            history.map((attempt, idx) => (
-              <div
-                key={attempt._id}
-                className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
-              >
-                <div className="flex items-center gap-4">
-                  {attempt.previous && attempt.current ? (
-                    <>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4 text-teal-500" />
-                        <span className="text-gray-700 text-sm">
-                          {formatDate(attempt.previous.createdAt)}
-                        </span>
-                      </div>
-                      <span className="text-gray-400">→</span>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4 text-teal-500" />
-                        <span className="text-gray-700 text-sm">
-                          {formatDate(attempt.current.createdAt)}
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    // single test fallback
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4 text-teal-500" />
-                      <span className="text-gray-700 text-sm">
-                        {formatDate(attempt.createdAt)}
-                      </span>
-                    </div>
-                  )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-bold flex items-center justify-center text-xl">{mbtiType}</div>
+                <div>
+                  <h2 className="text-xl font-bold">{data.title || mbtiType}</h2>
+                  <p className="text-sm text-gray-500">{data.summary}</p>
                 </div>
-
-                
-
-                
               </div>
-            ))
-          )}
+
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {traitCards.map((t) => (
+                  <div key={t.key} className={`p-4 rounded-xl border ${t.key === activeTrait ? 'border-teal-200' : 'border-gray-100'}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <t.icon size={18} className="text-teal-600" />
+                        <div>
+                          <h4 className="font-semibold">{t.title}</h4>
+                          <p className="text-sm text-gray-500">{data[t.key]?.short}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => setActiveTrait(t.key)} className="text-sm text-teal-600">View</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                <h3 className="font-semibold">Detailed</h3>
+                <p className="mt-2 text-gray-700 whitespace-pre-line">{data.detailed}</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <h3 className="font-semibold mb-3">Career Suggestions</h3>
+              <ul className="space-y-2 text-gray-700">
+                {(data.careerSuggestions || []).map((s, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="text-teal-500">•</span>
+                    <div>
+                      <div className="font-medium">{s.title}</div>
+                      <div className="text-sm text-gray-500">{s.description}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <h4 className="font-semibold mb-3">Traits</h4>
+              <div className="space-y-3">
+                {Object.entries(data.traits || {}).map(([k, v]) => (
+                  <InfoCard key={k} title={k} icon={Info} items={v} />
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow">
+              <h4 className="font-semibold mb-3">History</h4>
+              <div className="space-y-2 text-sm text-gray-700">
+                {history.length === 0 ? <div className="text-gray-500">No previous attempts</div> : history.map((h, idx) => (
+                  <div key={idx} className="flex justify-between">
+                    <div>{h.mbtiType}</div>
+                    <div className="text-gray-500">{formatDate(h.createdAt)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
         </div>
 
-        {/* DID YOU KNOW */}
-        <div className="bg-gradient-to-br from-indigo-50 to-teal-50 rounded-xl p-5 border">
-          <div className="flex items-center gap-2 mb-1">
-            <Info size={16} />
-            <h4 className="font-semibold text-sm">Did you know?</h4>
-          </div>
-          <p className="text-xs text-gray-600">
-            Less than 10% of people share your MBTI type — making your
-            perspective uniquely valuable.
-          </p>
-        </div>
-
-        {/* EXPLORE TYPES */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm">
-          <h3 className="font-semibold mb-3">Explore All Personality Types</h3>
-          <div className="grid grid-cols-4 gap-2">
-            {Object.keys(allTypes).map((type) => (
-              <button
-                key={type}
-                onClick={() => setModalData({ type, ...allTypes[type] })}
-                className="border rounded-xl py-2 text-sm hover:bg-gray-50"
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
+        {(compareOpen && <CompareModal data={compareData} onClose={() => setCompareOpen(false)} />)}
+        {(modalData && <TypeModal data={modalData} onClose={() => setModalData(null)} />)}
       </div>
-
-      {/* MODALS */}
-      {modalData && (
-        <TypeModal data={modalData} onClose={() => setModalData(null)} />
-      )}
-      {compareOpen && (
-        <CompareModal
-          data={compareData}
-          onClose={() => setCompareOpen(false)}
-        />
-      )}
     </div>
   );
 };

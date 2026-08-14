@@ -1,5 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./components/AuthProvider";
 import Navbar from "./components/Navbar";
 import LoginModal from "./components/LoginModal";
 import SignupModal from "./components/SignupModal";
@@ -19,33 +20,40 @@ function App() {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [showSkillForm, setShowSkillForm] = useState(false);
   return (
-    <div className="bg-gray-50 relative min-h-screen">
-      {/* Navbar: pass function to open login modal */}
-      <Navbar
-        onLoginClick={() => setIsLoginOpen(true)}
-        onSignupClick={() => setIsSignupOpen(true)}
-        onSkillClick={() => setShowSkillForm(true)}
-      />
+    <AuthProvider>
+      <div className="bg-gray-50 relative min-h-screen">
+        {/* Navbar: pass function to open login modal */}
+        <Navbar
+          onLoginClick={() => setIsLoginOpen(true)}
+          onSignupClick={() => setIsSignupOpen(true)}
+          onSkillClick={() => setShowSkillForm(true)}
+        />
 
-      {/* ROUTES */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/mbti-test" element={<MbtiTestPage />} />
-        <Route path="/result" element={<Resultpage />} />
-        <Route path="/companyportal" element={<CompanyPortalPage />} />
-        <Route path="/jobresult" element={<Jobresult />} />
-        <Route path="/myapplication" element={<MyApplicationPage />} />
-        <Route path="/analytics" element={<MbtiAnalytics />} />
-        <Route path="/admin" element={<AdminPortal />} />
-      </Routes>
+        {/* ROUTES */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/mbti-test" element={<MbtiTestPage />} />
+          <Route path="/result" element={<Resultpage />} />
+          <Route path="/companyportal" element={<CompanyPortalPage />} />
+          <Route path="/jobresult" element={<Jobresult />} />
+          <Route path="/myapplication" element={<MyApplicationPage />} />
+          <Route path="/analytics" element={<MbtiAnalytics />} />
+          <Route path="/admin" element={<AdminPortal />} />
+        </Routes>
 
-      {/* Login Modal */}
-      {isLoginOpen && <LoginModal onClose={() => setIsLoginOpen(false)} />}
-      {/* Signup Modal */}
-      {isSignupOpen && <SignupModal onClose={() => setIsSignupOpen(false)} />}
-      {/* Skill Form Modal */}
-      {showSkillForm && <SkillForm onClose={() => setShowSkillForm(false)} />}
-    </div>
+        {/* Login Modal */}
+        {isLoginOpen && (
+          <LoginModal
+            onClose={() => setIsLoginOpen(false)}
+            onOpenSignup={() => { setIsLoginOpen(false); setIsSignupOpen(true); }}
+          />
+        )}
+        {/* Signup Modal */}
+        {isSignupOpen && <SignupModal onClose={() => setIsSignupOpen(false)} />}
+        {/* Skill Form Modal */}
+        {showSkillForm && <SkillForm onClose={() => setShowSkillForm(false)} />}
+      </div>
+    </AuthProvider>
   );
 }
 

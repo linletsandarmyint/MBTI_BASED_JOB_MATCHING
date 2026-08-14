@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+﻿import { useEffect, useState } from "react";
+import api from "../api/authApi";
+import Modal from "./ui/Modal";
+import Button from "./ui/Button";
+
 export default function SkillForm({ onClose }) {
   const [categories, setCategories] = useState([]);
   const [skillsDB, setSkillsDB] = useState([]);
@@ -18,10 +20,14 @@ export default function SkillForm({ onClose }) {
   /* ================= FETCH SKILLS ================= */
   useEffect(() => {
     const fetchSkills = async () => {
-      const res = await axios.get(`${API_BASE_URL}/api/skills`);
-
-      setSkillsDB(res.data);
-      setCategories([...new Set(res.data.map((s) => s.category))]);
+      try {
+        const res = await api.get("/skills");
+        const data = res.data || [];
+        setSkillsDB(data);
+        setCategories([...new Set(data.map((s) => s.category))]);
+      } catch (err) {
+        console.warn("Failed to fetch skills", err);
+      }
     };
 
     fetchSkills();
@@ -29,9 +35,7 @@ export default function SkillForm({ onClose }) {
 
   /* ================= FILTER ================= */
   const filteredSkills = skillsDB.filter((s) => {
-    const categoryMatch = selectedCategory
-      ? s.category === selectedCategory
-      : true;
+    const categoryMatch = selectedCategory ? s.category === selectedCategory : true;
     const searchMatch = s.name.toLowerCase().includes(search.toLowerCase());
     return categoryMatch && searchMatch;
   });
@@ -54,9 +58,7 @@ export default function SkillForm({ onClose }) {
       experienceLevel: experience,
     };
 
-    const exists = selectedSkills.find(
-      (s) => s.skill === skillObj.skill && s.category === skillObj.category
-    );
+    const exists = selectedSkills.find((s) => s.skill === skillObj.skill && s.category === skillObj.category);
 
     if (!exists) {
       setSelectedSkills([...selectedSkills, skillObj]);
@@ -80,17 +82,12 @@ export default function SkillForm({ onClose }) {
 
     setLoading(true);
     try {
-      await axios.post(
-        `${API_BASE_URL}/api/auth/skills`,
-        { skills: selectedSkills },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await api.post("/auth/skills", { skills: selectedSkills });
 
       alert("Skills saved successfully ✅");
       onClose();
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Failed to save skills");
     } finally {
       setLoading(false);
@@ -98,139 +95,86 @@ export default function SkillForm({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-[620px] rounded-xl shadow-xl p-6">
-        {/* HEADER */}
-        <h2 className="text-2xl font-bold mb-1">Your Skills</h2>
-        <p className="text-gray-500 mb-4">
-          Choose a category, select skills or type your own, and add experience.
-        </p>
+    <Modal title="Your Skills" onClose={onClose} className="w-full max-w-2xl hide-scrollbar">
+      <p className="text-gray-500 mb-4">Choose a category, select skills or type your own, and add experience.</p>
 
-        {error && (
-          <div className="bg-red-100 text-red-600 px-3 py-2 rounded mb-3">
-            {error}
+      {error && <div className="bg-red-100 text-red-600 px-3 py-2 rounded mb-3">{error}</div>}
+
+      <div className="border border-gray-200 rounded-lg p-3 mb-4 max-h-28 overflow-y-auto flex flex-wrap gap-2 hide-scrollbar">
+        {selectedSkills.map((s, idx) => (
+          <div key={idx} className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-full px-3 py-1 text-xs">
+            <span className="font-medium">{s.skill}</span>
+            <span className="text-gray-500">{s.experienceLevel}</span>
+            <button onClick={() => removeSkill(s.skill)} className="text-red-500 ml-1">✕</button>
           </div>
-        )}
+        ))}
+      </div>
 
-        {/* SELECTED SKILLS (FIXED UI) */}
-        <div className="border rounded-lg p-2 mb-4 max-h-28 overflow-y-auto flex flex-wrap gap-1">
-          {selectedSkills.map((s, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-1 bg-teal-50 border border-teal-200 rounded-full px-2 py-1 text-xs"
-            >
-              <span className="font-medium">{s.skill}</span>
-              <span className="text-gray-500">{s.experienceLevel}</span>
-              <button
-                onClick={() => removeSkill(s.skill)}
-                className="text-red-500 ml-1"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* CATEGORY + EXPERIENCE */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Category</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setError(""); // ✨ clear error when category selected
-              }}
-              className="w-full border rounded px-3 py-2 mt-1"
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Experience</label>
-            <select
-              value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              className="w-full border rounded px-3 py-2 mt-1"
-            >
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-              <option>Expert</option>
-            </select>
-          </div>
-        </div>
-
-        {/* SEARCH */}
-        <div className="mt-4">
-          <label className="text-sm font-medium">Search skills</label>
-          <input
-            value={search}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Category</label>
+          <select
+            value={selectedCategory}
             onChange={(e) => {
-              setSearch(e.target.value);
+              setSelectedCategory(e.target.value);
               setError("");
             }}
             className="w-full border rounded px-3 py-2 mt-1"
-            placeholder="Type to search skills..."
-          />
-        </div>
-
-        {/* DB SKILLS */}
-        <div className="mt-2 max-h-40 overflow-y-auto border rounded p-2">
-          {filteredSkills.map((skill) => (
-            <div
-              key={skill.id}
-              onClick={() => addSkill(skill.name)}
-              className="flex justify-between px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-            >
-              <span>{skill.name}</span>
-              <span className="text-xs text-gray-400">{skill.category}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* MANUAL */}
-        <div className="mt-4">
-          <label className="text-sm font-medium">Add manually</label>
-          <div className="flex gap-2 mt-1">
-            <input
-              value={manualSkill}
-              onChange={(e) => {
-                setManualSkill(e.target.value);
-                setError("");
-              }}
-              className="flex-1 border rounded px-3 py-2"
-              placeholder="Type your skill..."
-            />
-            <button
-              onClick={() => addSkill(manualSkill)}
-              className="bg-teal-600 text-white px-4 rounded"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-
-        {/* ACTIONS */}
-        <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 border rounded">
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="px-4 py-2 bg-teal-600 text-white rounded disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Save Skills"}
-          </button>
+            <option value="">Select category</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Experience</label>
+          <select value={experience} onChange={(e) => setExperience(e.target.value)} className="w-full border rounded px-3 py-2 mt-1">
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>Expert</option>
+          </select>
         </div>
       </div>
-    </div>
+
+      <div className="mt-4">
+        <label className="text-sm font-medium">Search skills</label>
+        <input
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setError("");
+          }}
+          className="w-full border rounded px-3 py-2 mt-1"
+          placeholder="Type to search skills..."
+        />
+      </div>
+
+      <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2 hide-scrollbar">
+        {filteredSkills.map((skill) => (
+          <div key={skill.id} onClick={() => addSkill(skill.name)} className="flex justify-between px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <span>{skill.name}</span>
+            <span className="text-xs text-gray-400">{skill.category}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4">
+        <label className="text-sm font-medium">Add manually</label>
+        <div className="flex gap-2 mt-1">
+          <input value={manualSkill} onChange={(e) => { setManualSkill(e.target.value); setError(""); }} className="flex-1 border rounded px-3 py-2" placeholder="Type your skill..." />
+          <Button onClick={() => addSkill(manualSkill)} variant="primary">Add</Button>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 mt-6">
+        <Button onClick={onClose} variant="secondary">Cancel</Button>
+        <Button onClick={handleSave} variant="primary" disabled={loading}>{loading ? "Saving..." : "Save Skills"}</Button>
+      </div>
+    </Modal>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   PlusCircle,
   X,
@@ -20,7 +21,10 @@ import {
   getJobApplicationsApi,
   updateApplicationStatusApi,
   getCompanyJobsWithCountApi
-} from "../api/jobApi";
+} from "../api/jobApi2";
+
+import Modal from "../components/ui/Modal";
+import Button from "../components/ui/Button";
 
 const MBTI_TYPES = [
   "INTJ",
@@ -78,6 +82,15 @@ export default function CompanyPortal() {
   useEffect(() => {
     fetchMyJobs();
   }, []);
+
+  // handle hash based actions (e.g., /companyportal#post-job)
+  const location = useLocation();
+  useEffect(() => {
+    const h = (location.hash || "").replace("#", "");
+    if (h === "post-job") setShowForm(true);
+    if (h === "my-jobs") setShowForm(false);
+    if (h === "applications") setSelectedJob(null);
+  }, [location]);
 
   // ================= ADD SKILL =================
   const addSkill = () => {
@@ -483,121 +496,55 @@ export default function CompanyPortal() {
 
       {/* APPLICANTS MODAL */}
       {selectedJob && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-xl shadow-xl">
-            {/* HEADER */}
-            <div className="flex justify-between items-center px-6 py-4 border-b">
-              <div>
-                <p className="text-xl font-bold text-gray-500 mt-0.5">
-                  {selectedJob.title}
-                </p>
-              </div>
-
-              <X
-                className="cursor-pointer text-gray-500 hover:text-gray-700"
-                onClick={() => setSelectedJob(null)}
-              />
-            </div>
-
-            {/* BODY */}
-            <div className="p-6 max-h-[70vh] overflow-y-auto">
-              {applicants.length === 0 ? (
-                <div className="text-center py-16 text-gray-500">
-                  No applicants yet.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {applicants.map((app) => (
-                    <div
-                      key={app._id}
-                      className="border rounded-2xl p-5 hover:shadow-sm transition"
-                    >
-                      {/* TOP */}
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {app.applicant.name}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {app.applicant.email}
-                          </p>
-                          {/* MBTI BADGE */}
-                          {app.applicant.mbtiType && (
-                            <span
-                              className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold
-    border border-teal-300 bg-teal-50 text-teal-700"
-                            >
-                              MBTI: {app.applicant.mbtiType}
-                            </span>
-                          )}
-                          {/* SKILLS */}
-                          {app.applicant.skills?.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {app.applicant.skills.map((s, i) => (
-                                <span
-                                  key={i}
-                                  className="px-3 py-1 rounded-full text-xs font-medium
-          border border-teal-300 bg-teal-50 text-teal-800"
-                                >
-                                  {s.skill} · {s.experienceLevel}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* STATUS BADGE */}
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full font-semibold
-                      ${
-                        app.status === "accepted"
-                          ? "bg-green-100 text-green-700"
-                          : app.status === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : app.status === "reviewed"
-                              ? "bg-gray-200 text-gray-700"
-                              : "bg-gray-100 text-gray-600"
-                      }`}
-                        >
-                          {app.status.toUpperCase()}
-                        </span>
+        <Modal title={selectedJob.title} onClose={() => setSelectedJob(null)} className="w-full max-w-2xl">
+          <div className="max-h-[70vh] overflow-y-auto">
+            {applicants.length === 0 ? (
+              <div className="text-center py-16 text-gray-500">No applicants yet.</div>
+            ) : (
+              <div className="space-y-4">
+                {applicants.map((app) => (
+                  <div key={app._id} className="border rounded-2xl p-5 hover:shadow-sm transition">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-lg">{app.applicant.name}</h3>
+                        <p className="text-sm text-gray-500">{app.applicant.email}</p>
+                        {app.applicant.mbtiType && (
+                          <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold border border-teal-300 bg-teal-50 text-teal-700">MBTI: {app.applicant.mbtiType}</span>
+                        )}
+                        {app.applicant.skills?.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {app.applicant.skills.map((s, i) => (
+                              <span key={i} className="px-3 py-1 rounded-full text-xs font-medium border border-teal-300 bg-teal-50 text-teal-800">{s.skill} · {s.experienceLevel}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      {/* ACTION ROW */}
-                      <div className="flex items-center justify-between mt-4">
-                        {/* STATUS SELECT */}
-                        <select
-                          value={app.status}
-                          onChange={(e) =>
-                            handleStatusChange(app._id, e.target.value)
-                          }
-                          className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
-                        >
-                          <option value="applied">Applied</option>
-                          <option value="reviewed">Reviewed</option>
-                          <option value="accepted">Accepted</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-
-                        <button
-                          onClick={() => updateStatus(app._id, app.status)}
-                          className="px-5 py-2 rounded-lg text-sm font-semibold bg-green-600 text-white hover:bg-green-700 transition"
-                        >
-                          Update Status
-                        </button>
-                      </div>
+                      <span className={`text-xs px-3 py-1 rounded-full font-semibold ${app.status === "accepted" ? "bg-green-100 text-green-700" : app.status === "rejected" ? "bg-red-100 text-red-700" : app.status === "reviewed" ? "bg-gray-200 text-gray-700" : "bg-gray-100 text-gray-600"}`}>{app.status.toUpperCase()}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <select value={app.status} onChange={(e) => handleStatusChange(app._id, e.target.value)} className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400">
+                        <option value="applied">Applied</option>
+                        <option value="reviewed">Reviewed</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+
+                      <Button variant="primary" size="md" onClick={() => updateStatus(app._id, app.status)}>Update Status</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* CREATE MODAL/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+        <Modal title={editingJob ? "Edit Job" : "Create Job"} onClose={() => { setShowForm(false); setEditingJob(null); }} className="w-full max-w-2xl p-4">
+        <div>
           <form
             className="bg-white w-full max-w-md p-6 rounded-2xl"
             onSubmit={(e) => {
@@ -757,6 +704,7 @@ export default function CompanyPortal() {
             </button>
           </form>
         </div>
+        </Modal>
       )}
 
       <style>{`

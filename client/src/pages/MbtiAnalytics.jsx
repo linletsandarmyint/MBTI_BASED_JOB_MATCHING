@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getJobTrends } from "../api/analyticsApi";
+import { getJobTrends } from "../api/analyticsApi2";
 import MbtiBarChart from "../components/MbtiBarChart";
 
 const MbtiAnalytics = () => {
